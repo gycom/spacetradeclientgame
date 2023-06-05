@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Traders</title>
+    <script type="text/javascript" src="app.js"></script>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+    </style>
+</head>
+<body onload="bodyLoad()">
+    <h1>Space Traders</h1>
+    <nav>
+        <ul id="links"></ul>
+    </nav>
+    <div id="serverstatus"></div>
+    <div class="panel">
+        <div class="tabs">
+            <div class="tab-header">
+            </div>
+            <div class="tab-indicator"></div>
+            <div class="tab-content">
+            </div>
+        </div>
+    </div>
+    <div id="leaderboard"></div>
+    <div id="leaderboard2"></div>
+    <div id="registration">
+        <h1>Space Traders</h1>
+        <h3>Login</h3>
+            <label for="symbol">Call Sign:</label><input type="text" name="symbol" id="symbol" maxlength="14" size="14" placeholder="CALL_SIGN_HERE" value="">
+            <label for="faction">Faction:</label><input type="text" name="faction" id="faction" value="COSMIC">
+            <label for="email">Email:</label><input type="email" name="email" id="email" size="30" placeholder="optional" value="GhyslainInfo@gmail.com">
+            <button onclick="register()">Register</button>
+    </div>
+    <pre id="tempdata"></pre>
+</body>
+</html>
+

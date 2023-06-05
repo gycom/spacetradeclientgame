@@ -1,0 +1,359 @@
+@import "./icon.css";
+* 
+{
+    margin: 0;
+}
+body 
+{
+    /*background-color:#333;*/
+    color:white;
+    background-image:url("./spacebackground.png");
+    background-size: 350px;
+}
+a 
+{
+    color:white;text-decoration:none;
+    scrollbar-color:rgba(0,100,255,1);/* red orange;*/
+}
+body > h1
+{
+    border:2px solid black;
+    background-image:linear-gradient(red, yellow);
+    border-radius:20px;
+    padding:10px;
+    
+}
+h1
+{
+    text-shadow:-10px 10px 15px black;
+}
+
+/*a:visited{color:aqua}*/
+#links li {
+    display:inline-block;
+    width:130px;
+    height:20px;
+    border:1px black solid;
+    background-color:blue;
+    border-radius:30px;
+    text-align:center;
+    margin:5px;
+}
+#serverstatus
+{
+    height:150px;
+    width:800px;
+    overflow-x:wrap;
+    background-color:rgba(255,255,255,.3);
+}
+#leaderboard 
+{
+    position:fixed;
+    top:65px;
+    right:5px;
+    border:1px solid white;
+    border-radius: 10px;
+    background-color:rgba(6,6,6,.75);
+    width:200px;
+    font-size:.6rem;
+    padding:5px;
+}
+#leaderboard2 
+{
+    position:fixed;
+    top:150px;
+    right:5px;
+    border:1px solid white;
+    border-radius: 10px;
+    background-color:rgba(6,6,6,.75);
+    width:200px;
+    font-size:.6rem;
+    padding:5px;
+}
+@media only screen and (max-width:400px)
+{
+    #leaderboard,#leaderboard2
+    {
+        display:none;
+    }
+}
+#registration
+{
+    display:none;
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    background-color:rgba(255,255,255,.75);
+    border:2px black solid;
+    padding:50px;
+    color:black;
+    box-shadow:0 0 10px white;
+}
+.notlogged 
+{
+    display:block !important;
+}
+#registration label 
+{
+    color:black;
+    display:block;
+    width:100px;
+    margin-top:10px;
+}
+#tempdata
+{
+    position:relative;
+    left:50%;
+    background-color:lightblue;
+    border:1px dotted black;
+    max-height:300px;
+    overflow-y:scroll;
+    max-width:600px;
+    color:black;
+    transform:translate(0,100px)
+}
+button,input[type=checkbox]
+{
+    cursor:pointer;
+}
+button 
+{
+    background-color:red;
+    padding:10px;
+}
+
+.panel
+{
+/*    position:relative;*/
+    /*top:200px;*/
+    /*margin-top:50px;
+    margin-left:50px;*/
+    margin:auto;
+    margin-top:50px;
+    display:block;
+    width:90vw;
+    height:100%;
+    background-color:rgba(60, 60, 60,.9);
+    box-shadow:0 0 20px white;
+    border:3px black solid;
+    /*border-radius:15px;*/
+    box-sizing:border-box;
+    
+}
+.flex-row {
+    display:flex;
+    flex-direction:column;
+    
+}
+.flex-col {
+    display:flex;
+    flex-direction:row;
+}
+.listheader 
+{
+    width:100%;
+    height:50px;
+    background-color:transparent;
+    color:white;
+}
+.listscroll 
+{
+    width:20%;
+    height:100%;
+    overflow-y:scroll;
+    background-color:rgba(90,90,90,1);
+    padding-left:20px;
+}
+.listscroll div 
+{
+    padding-bottom:10px;
+    font-size:smaller;
+    border-bottom:1px dotted white;
+}
+.listscroll div:hover 
+{
+    background-color:#777;
+    cursor:pointer;
+}
+.listdetail
+{
+    width:80%;
+    height:100%;
+    overflow-y:scroll;
+    padding-left:20px;
+}
+
+.tabs
+{
+    position:relative;
+    transform-origin:0 0;
+    width:100%;
+    height:50vh;
+    overflow:hidden;
+    box-shadow: 0 0 15px 0 #031006;
+}
+.tab-header
+{
+    position:relative;
+    top:0;
+    left:0;
+    float:left;
+    width:160px;
+    height:100%;
+    border-right:1px solid white;
+    vertical-align:text-top;
+    overflow-x:hidden;
+}
+.tab-header > div 
+{
+    cursor:pointer;
+    height:40px;
+    line-height:20px;
+    font-size:16px;
+    font-weight:600;
+    color:white;
+    padding-top:5px;
+    border-bottom: 3px solid transparent;
+}
+.tab-header > div:hover,
+.tab-header > div.active 
+{
+    background-color:rgba(255,255,255,.1);
+    border-bottom: 3px solid rgba(255,255,0,.25);
+}
+
+.xxtext-white 
+{
+    color:white;
+}
+
+.tab-indicator 
+{
+    position:absolute;
+    top:0;
+    left:155px;
+    width:5px;
+    height:45px;
+    background: #ffbe00;
+    transition: all 100ms ease-in-out;
+}
+
+.tab-content 
+{
+    position:relative;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    margin-left:170px;
+    background:20px;
+}
+
+.tab-content > div.content
+{
+    position:absolute;
+    top:-400px;
+    left:0;
+    padding:0px 0px 0px;
+    display:none;
+    width:0;
+    height:0;
+    transition: all 500ms ease-in-out;
+}
+
+.tab-content > div.content.active 
+{
+    padding:0 40px 0;
+    display:block;
+    top:0;
+    left:0;
+    width:85%;
+    height:100%;
+    overflow-y:scroll;
+}
+
+.tab-content > div > h2 
+{
+    height:50px;
+}
+
+.delivery-list 
+{
+    padding-left:40px;
+}
+
+blockquote 
+{
+    padding-left:20px;
+    padding-right:20px;
+    padding-bottom:10px;
+}
+.traitlist {
+    padding-left:20px;
+}
+
+.panel-section
+{
+    position:relative;
+    top:0;
+    width:100%;
+    height:85%;
+}
+
+
+.section-header 
+{
+    position:relative;
+    top:0;
+    left:0;
+    display:inline;
+    width:10px;
+    overflow-x:hidden;
+}
+
+.section-header > div.sect 
+{
+    display:inline;
+    background-color:rgba(100,100,100,1); /* Ship tab color */
+    width:auto;
+    border-radius:10px 10px 0 0;
+    color:rgba(150,150,150,1);
+    padding:2px;
+    overflow-y:scroll;
+}
+.section-header > div.sect.active 
+{
+    background-color:rgba(120,120,120,1);
+    color:rgba(0,0,0,1);
+}
+
+.section-header > div:hover 
+{
+    background-color:red;
+    cursor:pointer;
+}
+.section-content 
+{
+    position:relative;
+    top:0;
+    left:0px;
+    height:98%;
+    background-color:rgba(120,120,120,1);
+}
+.section-content > div.section 
+{
+    position:absolute;
+    top:-400px;
+    left:-400px;
+    display:none;
+}
+
+.section-content > div.section.active 
+{
+    left:0px;
+    top:0px;
+    width:100%;
+    height:100px;
+    display:block;
+}
