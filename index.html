@@ -6,6 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Space Traders</title>
     <script type="text/javascript" src="app.js"></script>
+    <script type="text/javascript" src="views/agent.js"></script>
+    <script type="text/javascript" src="views/contract.js"></script>
+    <script type="text/javascript" src="views/faction.js"></script>
+    <script type="text/javascript" src="views/ship.js"></script>
+    <script type="text/javascript" src="views/system.js"></script>
+    <script type="text/javascript" src="views/tab.js"></script>
+    <script type="text/javascript" src="views/status.js"></script>
+    <script type="text/javascript" src="views/leaderboard.js"></script>
+    <script type="text/javascript" src="views/survey.js"></script>
+    <script type="text/javascript" src="API.js"></script>
     <link rel="stylesheet" href="style.css" />
     <style>
     </style>
@@ -25,6 +35,7 @@
             </div>
         </div>
     </div>
+    <div id="engineTemp" style="width:100%"></div>
     <div id="leaderboard"></div>
     <div id="leaderboard2"></div>
     <div id="registration">
@@ -34,6 +45,7 @@
             <label for="faction">Faction:</label><input type="text" name="faction" id="faction" value="COSMIC">
             <label for="email">Email:</label><input type="email" name="email" id="email" size="30" placeholder="optional" value="">
             <button onclick="register()">Register</button>
+            <p><span id="loginerror"></span></p>
     </div>
     <pre id="tempdata"></pre>
 </body>
