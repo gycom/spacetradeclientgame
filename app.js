@@ -1,24 +1,27 @@
 let state = null;
-
+let agents = [];
+let nextReset = null;
 function bodyLoad()
 {
-    getStatus((status) => 
-    {
-        if (status.status.indexOf("online") >= 0)
-        {
-            start();
-            return;
-        }
-    });
+    try {document.getElementById("login").focus();} catch(err){} // ready to login
+    getStatus((response)=>{
+        links(response);
+        serverstatus(response);
+        leaderboard(response);
+        buildAgentCombo();
+    })
 }
 
-function getStatus(callback)
+function getStatus(callback,callerror)
 {
-    API_GET("",(data)=>{
-        links(data);
-        serverstatus(data);
-        leaderboard(data);
-        callback(data);
+    // API: Get Status
+    API_GET("",(response)=>{
+        links(response);
+        serverstatus(response);
+        leaderboard(response);
+        callback(response);
+    },(response)=>{
+        callerror(response); // token must be expired
     });
 }
 
@@ -26,14 +29,14 @@ function getStatus(callback)
 
 function acceptContract(contractId)
 {
-    API_POST(`my/contracts/${contractId}/accept`,{/*contractId:contractId*/},(data)=>{
-        if (data.error) 
+    API_POST(`my/contracts/${contractId}/accept`,{/*contractId:contractId*/},(response)=>{
+        if (response.error) 
         {
-            if (data.error.code==4501) // already accepted... oups!!
+            if (response.error.code==4501) // already accepted... oups!!
             {
-                API_GET("my/contracts",(data)=>{
-                    dump(data);
-                    state.contracts=data.data;
+                API_GET("my/contracts",(response)=>{
+                    dump(response);
+                    state.contracts=response.data;
                     state.contract=state.contracts[0];
                     state.current.contractIndex=0;
                 });
@@ -42,29 +45,29 @@ function acceptContract(contractId)
         else
         {
             var index = state.contracts.reduce((t,e,n)=>{
-                console.log("search existing", data.data.contract.id,e.id,n);
-                if (data.data.contract.id==e.id) 
+                //console.log("search existing", response.data.contract.id,e.id,n);
+                if (response.data.contract.id==e.id) 
                     return n;
                 else
                     return t;
             },-1);
             if (index>=0) {
-                if (data.data.contract)
+                if (response.data.contract)
                 {
-                    state.contracts[index] = data.data.contract;
-                    state.contract = data.data.contract;
+                    state.contracts[index] = response.data.contract;
+                    state.contract = response.data.contract;
                     state.current.contractIndex = index;
                 }
                 else
                 {
-                    console.log(data.data.contract,data.data,data,state)
+                    //console.log(response.data.contract,response.data,data,state)
                 }
             }
             else
             {
                 state.contracts=[];
-                state.contracts.push(data.contract);
-                state.contract = data.contract;
+                state.contracts.push(response.contract);
+                state.contract = response.contract;
                 state.current.contractIndex = 0;
             }
         
@@ -76,31 +79,29 @@ function acceptContract(contractId)
 
 function goOrbit(shipname)
 {
-    API_POST(`my/ships/${shipname}/orbit`,null,(data)=>{
+    API_POST(`my/ships/${shipname}/orbit`,null,(response)=>{
         var ndx = findShipIndex(shipname);
-        state.fleet[ndx].nav = data.data;
-        state.ship.nav = data.data;
+        state.fleet[ndx].nav = response.data.nav;
+        state.ship.nav = response.data.nav;
         keepState();
         redrawTabs();
     })
 }
 function goDock(shipname)
 {
-    API_POST(`my/ships/${shipname}/dock`,null,(data)=>{
+    API_POST(`my/ships/${shipname}/dock`,null,(response)=>{
         var ndx = findShipIndex(shipname);
-        state.fleet[ndx].nav = data.data;
-        state.ship.nav = data.data;
+        state.fleet[ndx].nav = response.data.nav;
+        state.ship.nav = response.data.nav;
         keepState();
         redrawTabs();
     })
 }
 function navigateShip(shipname,waypoint)
 {
-    console.log("navigate ",shipname," to ",waypoint);
-    API_POST(`my/ships/${shipname}/navigate`,{waypointSymbol:waypoint},(data)=>{
-        console.log(data.data);
-        if (data.fuel) {state.ship.fuel = data.fuel; refreshFuel(state.ship.fuel);}
-        if (data.nav)  {state.ship.nav = data.nav;   refreshNav(state.ship.nav);}
+    API_POST(`my/ships/${shipname}/navigate`,{waypointSymbol:waypoint},(response)=>{
+        if (response.data.fuel) {state.ship.fuel = response.data.fuel; refreshFuel(state.ship.fuel);}
+        if (response.data.nav)  {state.ship.nav = response.data.nav;   refreshNav(state.ship.nav);}
         state.fleet[findShipIndex(state.ship.symbol)] = state.ship;
         currentTab = 3;
         currentSection = 0;
@@ -110,7 +111,7 @@ function navigateShip(shipname,waypoint)
 }
 function scanWaypoint(shipname,waypoint)
 {
-    API_POST(`my/ships/${shipname}/scan/waypoints`,null,(data)=>{
+    API_POST(`my/ships/${shipname}/scan/waypoints`,null,(response)=>{
         //state.
         keepState();
         redrawTabs();
@@ -120,11 +121,10 @@ function scanWaypoint(shipname,waypoint)
 
 function createSurvey(shipname)
 {
-    API_POST(`my/ships/${shipname}/survey`,null,(data)=>{
-        //console.log(data)
+    API_POST(`my/ships/${shipname}/survey`,null,(response)=>{
         if (!state.surveys) state.surveys = [];
-        state.surveys = state.surveys.concat(data.data.surveys);
-        setCooling(shipname,data.data.cooldown.totalSeconds);
+        state.surveys = state.surveys.concat(response.data.surveys);
+        setCooling(shipname,response.data.cooldown.totalSeconds);
         keepState();
         redrawTabs();
     })
@@ -132,24 +132,21 @@ function createSurvey(shipname)
 var lastSurvey;
 function refreshCargo(shipname,surveydata)
 {
-    API_GET(`/my/ships/${shipname}/cargo`,(data)=>{
-        state.ship.cargo = data.data;
+    API_GET(`/my/ships/${shipname}/cargo`,(response)=>{
+        state.ship.cargo = response.data;
         state.fleet[state.current.shipIndex] = state.ship;
         keepState();
         currentSection = 8;
         dropIrrelevantCargo(shipname);
         redrawTabs();
-        //if (surveydata && state.ship.cargo.units < state.ship.cargo.capacity*.9)
-          //  extractResource(shipname,surveydata);
-
     })
 }
 
 function extractResource(shipname,surveydata)
 {
     lastSurvey = surveydata;
-    API_POST(`my/ships/${shipname}/extract`,JSON.parse(unescape(surveydata)),(data)=>{
-        setCooling(shipname,data.data.cooldown.totalSeconds,()=>{extractResource(shipname,surveydata)});
+    API_POST(`my/ships/${shipname}/extract`,JSON.parse(unescape(surveydata)),(response)=>{
+        setCooling(shipname,response.data.cooldown.totalSeconds,()=>{extractResource(shipname,surveydata)});
         refreshCargo(shipname,surveydata);
     })
 }
@@ -162,7 +159,6 @@ function dropIrrelevantCargo(shipname)
     if (waste.length>0)
         setTimeout(()=>{
             var material = waste.shift();
-            console.log("drop",material)
             if (material)
             {
                 dropCargo(shipname,material.units,material.symbol);
@@ -172,7 +168,11 @@ function dropIrrelevantCargo(shipname)
 }
 function dropCargo(shipname,unit,elementSymbol)
 {
-    API_POST(`my/ships/${shipname}/jettison`,{symbol:elementSymbol,units:unit},(data)=>{
+    API_POST(`my/ships/${shipname}/jettison`,{
+        symbol:elementSymbol,
+        units:unit
+    },(response) => {
+        console.log(response);
         refreshCargo(shipname);
     });
 }
@@ -181,12 +181,11 @@ function reviveCooldown()
 {
     state.fleet.forEach(ship=> {
         console.log("check cooldown for ",ship.symbol);
-        API_GET(`my/ships/${ship.symbol}/cooldown`,(data)=>{
-            console.log(data.data);
-            setCooling(ship.symbol,data.data.remainingSeconds);
-        },(error)=>{
-            if (error.error)
-                console.log(error.error.message);
+        API_GET(`my/ships/${ship.symbol}/cooldown`,(response)=>{
+            setCooling(ship.symbol,response.data.remainingSeconds);
+        },(response)=>{
+            if (response.error)
+                console.log(response.error.message);
         })
     })
 }
@@ -293,8 +292,7 @@ function redrawTabs()
 
 function logout()
 {
-    localStorage.removeItem("SpaceTradersData",null);
-    document.getElementById("registration").classList.remove("notlogged");
+    document.getElementById("registration").classList.add("notlogged");
     var div = document.querySelector(".panel");
     div.innerHTML = `
 <div class="tabs">
@@ -311,17 +309,17 @@ function logout()
 
 
 
-function dump(data) // for debugging
+function dump(objectvalue) // for debugging
 {
     let pre = document.getElementById("tempdata");
     if (pre){
-        if (typeof(data)=="string")
-            pre.innerHTML = data;
+        if (typeof(objectvalue)=="string")
+            pre.innerHTML = objectvalue;
         else
         {
-            if (typeof(data)=="object")
+            if (typeof(objectvalue)=="object")
             {
-                pre.innerHTML = JSON.stringify(data,null,2);
+                pre.innerHTML = JSON.stringify(objectvalue,null,2);
             }
         }
     }
@@ -329,37 +327,40 @@ function dump(data) // for debugging
 
 function register()
 {
+    delete state.token;
     const body = {
-        "faction":document.getElementById("faction").value,
-        "symbol":document.getElementById("symbol").value,
-        "email":document.getElementById("email").value
+        faction:document.getElementById("faction").value,
+        symbol: document.getElementById("symbol").value,
+        email:  document.getElementById("email").value
     };
-    API_POST("register", body, data =>
+    API_POST("register", body, response =>
     {
-        console.log(data)
-        if (data.error)
+        console.log(response)
+        if (response.error)
         {
             var span = document.getElementById("loginerror");
-            switch(data.error.code)
+            switch(response.error.code)
             {
                 case 4109:
                     span.innerHTML = "Agent symbol has already been claimed."
                     break;
                 case 422:
-                    span.innerHTML = Object.entries(data.error.data).map(([key,value])=>value).join("<br>");    
+                    span.innerHTML = Object.entries(response.error.data).map(([key,value])=>value).join("<br>");    
                     break;
                 default:
-                    span.innerHTML = Object.entries(data.error.data).map(([key,value])=>value).join("<br>");
+                    span.innerHTML = Object.entries(response.error.data).map(([key,value])=>value).join("<br>");
             }
-            dump(data);
+            dump(response);
         }
         else
         {
-            state = stateFromRegister(data);
+            state = stateFromRegister(response);
             localStorage.setItem("SpaceTradersData",JSON.stringify(state));
-            API_GET(`systems/${state.ship.nav.systemSymbol}`,(data)=>{
-                state.system = data.data;
-                state.systems = [data.data];
+            pushAgent();
+            keepAgents();
+            API_GET(`systems/${state.ship.nav.systemSymbol}`,(response)=>{
+                state.system = response.data;
+                state.systems = [response.data];
                 state.current.systemIndex = 0;
                 keepState();
             });
@@ -368,23 +369,101 @@ function register()
         }
     });
 }
-
-function stateFromRegister(store)
+function stateFromRegister(response)
 {
-    return {
+    const state = {
+        agent:      response.data.agent,
+        contracts:  [response.data.contract],
+        contract:   response.data.contract,
+        factions:   [response.data.faction],
+        faction:    response.data.faction,
+        fleet:      [response.data.ship],
+        ship:       response.data.ship,
+        token:      response.data.token,
         current: {
-            contractIndex:0,
-            factionIndex:0,
-            shipIndex:0,
-            systemIndex:0
-        },
-        agent:store.data.agent,
-        contracts:[store.data.contract],
-        contract:store.data.contract,
-        factions:[store.data.faction],
-        faction:store.data.faction,
-        fleet:[store.data.ship],
-        ship:store.data.ship,
-        token:store.data.token
+            contractIndex:  0,
+            factionIndex:   0,
+            shipIndex:      0,
+            systemIndex:    0,
+            surveyIndex:    0
+        }
     };
+    return state;
 }
+
+function keepAgents()
+{
+    localStorage.setItem("SpaceTradersAgents",JSON.stringify(agents));
+}
+function pushAgent()
+{
+    agents = agents.map(agent=>({...agent,currentAgent:false}));
+    agents.push({
+        agent:          state.agent,
+        token:          state.token,
+        creation:       new Date(),
+        currentAgent:   true,
+        nextReset:      nextReset || (new Date()).toLocaleString()
+    });
+}
+function loadAgents()
+{
+    if (localStorage.getItem("SpaceTradersAgents")!=null)
+        agents = JSON.parse(localStorage.getItem("SpaceTradersAgents"));
+    else
+        agents = [];
+}
+function buildAgentCombo()
+{
+    const newOption = (value,text,def) => {
+        var opt = document.createElement("OPTION");
+        opt.text = text;
+        opt.value = value;
+        if (value == def) opt.selected = true;
+        return opt;
+    };
+    loadAgents();
+    var def = (agents.filter(e=>e.currentAgent)[0]||{agent:{symbol:""}}).agent.symbol;
+    var cbo = document.getElementById("agentlist");
+    cbo.options.add(newOption("","-- new agent --"));
+    agents.forEach((agent)=>cbo.options.add(newOption(agent.agent.symbol,agent.agent.symbol,def)));
+    selectAgent();
+}
+
+function selectAgent()
+{
+    var selectedValue = document.getElementById("agentlist").value;
+    document.getElementById("loginform").className = selectedValue != "" ? "oldagent" : "newagent";
+    if (selectedValue=="") return;
+    state = {token:agents.filter(e=>e.agent.symbol==selectedValue)[0].token};
+    var loginButton = document.getElementById("login");
+    getStatus(success,failure);
+    function success(response)
+    {
+        loginButton.disabled = false;
+        document.getElementById("loginerror").innerHTML = "";
+    }
+    function failure(response)
+    {
+        console.log("failure",response.error.message);
+        loginButton.disabled = true;
+        document.getElementById("loginerror").innerHTML = response.error.message;
+    }
+}
+
+function doLogin()
+{
+    const success = (response) => 
+    {
+        if (response.status.indexOf("online") >= 0)
+        {
+            start();
+            return;
+        }
+    };
+    const failure = (response)=>{
+        console.log("STATUS ERROR",response)
+    };
+    getStatus(success,failure);
+}
+

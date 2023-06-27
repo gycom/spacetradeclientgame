@@ -1,4 +1,5 @@
 function systemList(list) {
+    if (!list) return "";
     return list.map(listItem).join("");
     function listItem(item) {
         return `<div data-system="${item.symbol}">${item.symbol} ${item.type}<br>dist: ${calcDist(item.x, item.y)}</div>`;
@@ -28,7 +29,7 @@ function waypointInfo(wp)
         if (wp.symbol==state.ship.nav.waypointSymbol && state.ship.nav.status=="IN_ORBIT")
         {
             //console.log(state.surveys.filter(e=>e.symbol==wp.symbol))
-            if (state.surveys.filter(e=>e.symbol==wp.symbol).length > 0)
+            if (state.surveys && state.surveys.filter(e=>e.symbol==wp.symbol).length > 0)
             {
                 buttonList += `<button onclick="extractResource('${state.ship.symbol}','${escape(JSON.stringify(state.surveys.filter(e=>e.symbol==wp.symbol)[0]))}')">Extraction</button>`;
             }
@@ -57,28 +58,31 @@ function selectSystem()
         {
             state.current.systemIndex = ndx;
             state.system = state.systems[state.current.systemIndex];
-            refresh();
+            redrawTabs();
         }
     }
 }
 function findSystemIndex(sel)
 {
-    return (state.systems.map((e,n)=>({n:n,e:e})).filter(e=>e.e.symbol==sel)||[{n:-1}])[0].n;
+    return ((state.systems.map((e,n)=>({n:n,e:e})).filter(e=>e.e.symbol==sel))[0]||[{n:-1}]).n;
 }
 
 function refreshSystemList()
 {
-    API_GET("systems",(data)=>{
-        state.systems = data.data;
-        API_GET(`systems/${state.ship.nav.systemSymbol}`,(data)=>{
-            state.system = data.data;
+    API_GET("systems",(response)=>{
+        state.systems = response.data;
+        API_GET(`systems/${state.ship.nav.systemSymbol}`,(response)=>{
+            state.system = response.data;
         })
-        showTabContent(state);
+        redrawTabs();
     })
 }
 function calcDist(x,y)
 {
-    var here = state.systems[findSystemIndex(state.ship.nav.systemSymbol)];
+    console.log(state.ship.nav.systemSymbol)
+    var ndx = findSystemIndex(state.ship.nav.systemSymbol);
+    console.log(ndx,state.ship.nav.systemSymbol,state.ship.nav)
+    var here = state.systems[ndx];
     return Math.round(100*Math.sqrt((here.x - x)*(here.x - x) + (here.y - y)*(here.y - y)))/100;
 }
 

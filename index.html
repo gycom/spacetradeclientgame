@@ -36,15 +36,20 @@
         </div>
     </div>
     <div id="engineTemp" style="width:100%"></div>
+    <div id="unmanagederror"></div>
     <div id="leaderboard"></div>
     <div id="leaderboard2"></div>
-    <div id="registration">
+    <div id="registration" class="notlogged">
         <h1>Space Traders</h1>
         <h3>Login</h3>
-            <label for="symbol">Call Sign:</label><input type="text" name="symbol" id="symbol" maxlength="14" size="14" placeholder="CALL_SIGN_HERE" value="">
-            <label for="faction">Faction:</label><input type="text" name="faction" id="faction" value="COSMIC">
-            <label for="email">Email:</label><input type="email" name="email" id="email" size="30" placeholder="optional" value="">
-            <button onclick="register()">Register</button>
+            <label for="agentlist">Registered Agent:</label><select name="agentlist" id="agentlist" onchange="selectAgent()" tabindex="1"></select>
+            <fieldset id="loginform">
+                <label for="symbol">Call Sign:</label><input type="text" name="symbol" id="symbol" maxlength="14" size="14" placeholder="CALL_SIGN_HERE" value="">
+                <label for="faction">Faction:</label><input type="text" name="faction" id="faction" value="COSMIC">
+                <label for="email">Email:</label><input type="email" name="email" id="email" size="30" placeholder="optional" value="">
+                <button onclick="register()">Register</button>
+            </fieldset>
+            <button onclick="doLogin()" id="login">Login</button>
             <p><span id="loginerror"></span></p>
     </div>
     <pre id="tempdata"></pre>

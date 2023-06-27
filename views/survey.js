@@ -1,4 +1,5 @@
 function surveyList(list) {
+    if (!list) return "";
     return list.map(listItem).join("");
     function listItem(item) {
         return `<div data-survey="${item.signature}">${item.symbol}</div>`;
@@ -32,11 +33,16 @@ function selectSurvey()
         {
             state.current.surveyIndex = ndx;
             state.survey = state.surveys[state.current.surveyIndex];
-            refresh();
+            redrawTabs();
         }
     }
 }
 function findSurveyIndex(sel)
 {
     return (state.surveys.map((e,n)=>({n:n,e:e})).filter(e=>e.e.signature==sel)||[{n:-1}])[0].n;
+}
+
+function refreshSurvey()
+{
+    
 }

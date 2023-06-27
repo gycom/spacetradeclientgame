@@ -38,7 +38,7 @@ function selectFaction()
         {
             state.current.factionIndex = ndx;
             state.faction = state.factions[state.current.factionIndex];
-            refresh();
+            redrawTabs();
         }
     }
 
@@ -49,14 +49,14 @@ function findFactionIndex(sel)
 }
 function refreshFactionList()
 {
-    API_GET("factions",(data)=>{
-        state.factions = data.data;
+    API_GET("factions",(response)=>{
+        state.factions = response.data;
         if (state.factions.length>0)
         {
-            API_GET(`factions/${state.factions[state.current.factionIndex].symbol}`,(data)=>{
-                state.faction = data.data;
+            API_GET(`factions/${state.factions[state.current.factionIndex].symbol}`,(response)=>{
+                state.faction = response.data;
             });
         }
-        showTabContent(state);
+        redrawTabs();
     })
 }

@@ -1,5 +1,6 @@
 function shipList(list)
 {
+    if (!list) return "";
     return list.map(listItem).join("");
     function listItem(item)
     {
@@ -9,6 +10,7 @@ function shipList(list)
 function shipInfo(ship)
 {
     //  ${}
+    if (!ship) return "";
     return `
     <div onclick="setCooling('${ship.symbol}',100)">Registration: ${ship.symbol} Type: ${ship.registration.role}
     
@@ -77,7 +79,7 @@ function shipInfo(ship)
         function makeButtonSurveyExtraction()
         {
             var buttonList = "";
-            if (state.surveys.filter(e=>e.symbol == nav.waypointSymbol).length > 0)
+            if (state.surveys && state.surveys.filter(e=>e.symbol == nav.waypointSymbol).length > 0)
             {
                 buttonList += `<button onclick="extractResource('${state.ship.symbol}','${escape(JSON.stringify(state.surveys.filter(e=>e.symbol == nav.waypointSymbol)[0]))}')">Extraction</button>`;
             }
@@ -95,9 +97,9 @@ function shipInfo(ship)
             {
                 return `
                 <div>
-                    Departure: ${wayPoint(route.departure)} (${dt(route.arrival)})<br>
+                    Departure: ${wayPoint(route.departure)} (${dt(route.departureTime)})<br>
                     Destination: ${wayPoint(route.destination)} 
-                    (${dt(route.departureTime)})
+                    (${dt(route.arrival)})
                 </div>
 `;
             }
@@ -189,9 +191,9 @@ function shipInfo(ship)
         return `
         <div>Capacity:${cargo.capacity}</div>
         <div>Units:${cargo.units}</div>
-        <div>
-            <button onclick="extractResource('${ship.symbol}',lastSurvey)">Extract again</button>
-            <button onclick="cancelRestart('${ship.symbol}')">Stop after cooling</button>
+        <div>` 
+            + (lastSurvey?`<button onclick="extractResource('${ship.symbol}',lastSurvey)">Extract again</button>`:"")
+            + `<button onclick="cancelRestart('${ship.symbol}')">Stop after cooling</button>
         </div>
         <div>Inventory:${inventoryList(cargo.inventory)}</div>
         <div><button onclick="dropIrrelevantCargo('${ship.symbol}')">Drop Waste</button></div>
@@ -226,7 +228,7 @@ function selectShip()
         {
             state.current.shipIndex = ndx;
             state.ship = state.fleet[state.current.shipIndex];
-            refresh();
+            refreshFleetList();
         }
     }
 }
@@ -236,16 +238,17 @@ function findShipIndex(sel)
 }
 function refreshFleetList(callback)
 {
-    API_GET("my/ships",(data)=>{
-        state.fleet = data.data;
+    API_GET("my/ships",(response)=>{
+        state.fleet = response.data;
         if (state.fleet.length>0)
         {
-            API_GET(`my/ships/${state.fleet[state.current.shipIndex].symbol}`,(data)=>{
-                state.ship = data.data;
-                console.log(data);
+            API_GET(`my/ships/${state.fleet[state.current.shipIndex].symbol}`,(response)=>{
+                state.ship = response.data;
+                keepState();
             });
         }
-        showTabContent(state);
+        keepState();
+        redrawTabs();
         if (callback) callback();
     })
 }

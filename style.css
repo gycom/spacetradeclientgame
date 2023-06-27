@@ -359,3 +359,11 @@ blockquote
     height:100px;
     display:block;
 }
+
+#loginform.oldagent
+{
+    display:none;
+}
+#loginform.newagent + #login {
+    display:none;
+}

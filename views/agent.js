@@ -12,6 +12,6 @@ function refreshAgent()
     API_GET("my/agent",(data)=>{
         currentTab = 0;
         state.agent = data.data;
-        showTabContent(state);
+        redrawTabs();
     })
 }

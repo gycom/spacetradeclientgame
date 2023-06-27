@@ -61,7 +61,7 @@ function showTabContent(data)
             ${panListDetail("System",systemList(data.systems),systemInfo(data.system),"refreshSystemList")}
         </div>
         <div class="content text-white icon icon-atom ${currentTab==5?'active':''}" onclick="selectSurvey()">
-            ${panListDetail("Surveys",surveyList(data.surveys),surveyInfo(data.survey),"")}
+            ${panListDetail("Surveys",surveyList(data.surveys),surveyInfo(data.survey),"refreshSurvey")}
         </div>
         `;
     initSect();

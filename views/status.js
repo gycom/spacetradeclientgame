@@ -1,17 +1,18 @@
-function serverstatus(data)
+function serverstatus(response)
 {
     var div=document.getElementById("serverstatus");
     div.innerHTML = 
     `
         <p>
-        ${data.version}: 
-        ${data.status}
+        ${response.version}: 
+        ${response.status}
         </p>
-        <p><i>Last Reset: ${d(data.resetDate)}</i></p>
-        <p><i>Next Reset: ${dt(data.serverResets.next)}</i></p>
-        <p>${data.description}</p>
-        <p><i>${JSON.stringify(data.stats)}</i></p>
+        <p><i>Last Reset: ${d(response.resetDate)}</i></p>
+        <p><i>Next Reset: ${dt(response.serverResets.next)}</i></p>
+        <p>${response.description}</p>
+        <p><i>${JSON.stringify(response.stats)}</i></p>
     `;
+    nextReset = response.serverResets.next;
 }
 
 function links(data)

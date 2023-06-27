@@ -1,5 +1,6 @@
 function contractList(list)
 {
+    if (!list) return "";
     return list.map(listItem).join("");
     function listItem(item)
     {
@@ -8,6 +9,7 @@ function contractList(list)
 }
 function contractInfo(contract)
 {
+    if (!contract) return "";
     return `
     <div>Type: ${contract.type}</div>
     <div>Faction: ${contract.factionSymbol}</div>
@@ -60,7 +62,7 @@ function selectContract()
         {
             state.current.contractIndex = ndx;
             state.contract = state.contracts[state.current.contractIndex];
-            refresh();
+            redrawTabs();
         }
     }
 
@@ -71,14 +73,13 @@ function findContractIndex(sel)
 }
 function refreshContractList()
 {
-    API_GET("my/contracts",(data)=>{
-        state.contracts = data.data;
+    API_GET("my/contracts",(response)=>{
+        state.contracts = response.data;
         if (state.contracts.length>0)
         {
-            API_GET(`my/contracts/${state.contracts[state.current.contractIndex].id}`,(data)=>{
-                state.contract = data.data;
-            })
+            API_GET(`my/contracts/${state.contracts[state.current.contractIndex].id}`
+                ,(response)=>{state.contract = response.data})
         }
-        showTabContent(state);
+        redrawTabs();
     })
 }
