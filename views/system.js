@@ -79,9 +79,8 @@ function refreshSystemList()
 }
 function calcDist(x,y)
 {
-    console.log(state.ship.nav.systemSymbol)
     var ndx = findSystemIndex(state.ship.nav.systemSymbol);
-    console.log(ndx,state.ship.nav.systemSymbol,state.ship.nav)
+    if (ndx<0) return 0;
     var here = state.systems[ndx];
     return Math.round(100*Math.sqrt((here.x - x)*(here.x - x) + (here.y - y)*(here.y - y)))/100;
 }

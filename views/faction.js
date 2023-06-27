@@ -14,7 +14,7 @@ function factionInfo(faction)
         <div>Headquarters: ${faction.headquarters}</div>
         <div>Trait:</div>
         <div class="traitlist">${traitList()}</div>
-        <div><input type="checkbox" ${faction.isRecruiting?"checked":""} readonly=readonly> is recruiting?</div>
+        <div><input type="checkbox" ${faction.isRecruiting?"checked":""} readonly=readonly name="recruiting"> is recruiting?</div>
 `;
     function traitList()
     {

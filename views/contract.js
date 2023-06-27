@@ -19,8 +19,8 @@ function contractInfo(contract)
     <div>Deliver:</div>
     <div class="delivery-list">${goodList(contract.terms.deliver)}</div>
     <br>
-    <div><input type="checkbox" ${contract.accepted?"checked":""} disabled> Accepted</div>
-    <div><input type="checkbox" ${contract.fulfilled?"checked":""} disabled> Fulfilled</div>
+    <div><input type="checkbox" ${contract.accepted?"checked":""} disabled name="accepted"> Accepted</div>
+    <div><input type="checkbox" ${contract.fulfilled?"checked":""} disabled name="fulfilled"> Fulfilled</div>
     <br>
     <div>Expired on ${dt(contract.expiration)}</div>
     <div>Must accept before ${dt(contract.deadlineToAccept)}</div>
