@@ -43,9 +43,28 @@ function contractInfo(contract)
         return  goods.map(goodItem).join("<br>");
         function goodItem(e)
         {
-            return `
+            var line = `
             ${e.tradeSymbol}: ${e.unitsFulfilled} / ${e.unitsRequired} units for ${e.destinationSymbol}
             `;
+            if (state.ship.cargo.inventory.length>0)
+            {
+                state.ship.cargo.inventory.forEach(trade=>{
+                    if (trade.symbol==e.tradeSymbol)
+                        line += trade.units + " units in cargo"
+                    if (state.ship.nav.waypointSymbol==e.destinationSymbol)
+                    {
+                        if (state.ship.nav.status!="DOCKED")
+                        {
+                            line += `<button onclick=\"goDock('${state.ship.symbol}')\">Dock</button>`;
+                        }
+                        else
+                        {
+                            line += `<button onclick=\"deliverContract('${state.ship.symbol}','${contract.id}','${trade.symbol}',${trade.units})\">Deliver</button>`;
+                        }
+                    }
+                })
+            }
+            return line;
         }
     }
 }

@@ -64,7 +64,7 @@ async function API_POST(query,body,callback,errorcb)
     } catch(err) {
         console.log("ERREUR POST RESPONSE",err,response)
     }
-    console.log("Post Catch")
+   //console.log("Post Catch")
     json = await response.json();
     if (json.error) unmanaged(json.error.message);
     if (json.error)

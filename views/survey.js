@@ -28,7 +28,7 @@ function selectSurvey()
     var selection = target.getAttribute("data-survey");
     if (selection!=null)
     {
-        var ndx = findSurveyIndex(selection);
+        var ndx = findSurveySignatureIndex(selection);
         if (ndx>=0)
         {
             state.current.surveyIndex = ndx;
@@ -37,9 +37,13 @@ function selectSurvey()
         }
     }
 }
-function findSurveyIndex(sel)
+function findSurveySignatureIndex(sel)
 {
-    return (state.surveys.map((e,n)=>({n:n,e:e})).filter(e=>e.e.signature==sel)||[{n:-1}])[0].n;
+    return (state.surveys.map((e,n)=>({n:n,e:e})).filter(e=>e.e.signature==sel)[0]||[{n:-1}]).n;
+}
+function findSurveySymbolIndex(sel)
+{
+    return (state.surveys.map((e,n)=>({n:n,e:e})).filter(e=>e.e.symbol==sel)[0]||[{n:-1}]).n;
 }
 
 function refreshSurvey()

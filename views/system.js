@@ -12,36 +12,53 @@ function systemInfo(system) {
     <div>sector: ${system.sectorSymbol}</div>
     <div>type: ${system.type}</div>
     <div>coord: ${system.x} ${system.y}</div>
+    ${systemButton()}
     <br>
     <p><table>${system.waypoints.map(waypointInfo).join("")}</table></p>
     `;
 }
-
+function systemButton()
+{
+    var list = "";
+    if (state.ship.nav.status=="IN_ORBIT")
+        list += `<button onclick="scanWaypoints('${state.ship.symbol}')">Scan waypoints</button>`;
+    return list;
+}
 function waypointInfo(wp)
 {
     return `<tr data-waypoint="${wp.symbol}" style="width:100%">
-    <td>${wp.symbol}</td><td>${wp.type}</td><td>coord: ${wp.x} ${wp.y}</td><td>${makeNavigateButton()}</td>
+    <td>${wp.symbol}</td><td title='${listTraits(wp)}'>${wp.type}</td><td>coord: ${wp.x} ${wp.y}</td><td>${makeNavigateButton()}</td>
     </tr>
     `;
     function makeNavigateButton()
     {
         var buttonList = "";
-        if (wp.symbol==state.ship.nav.waypointSymbol && state.ship.nav.status=="IN_ORBIT")
+        if (wp.symbol==state.ship.nav.waypointSymbol)
+        { 
+            if (state.ship.nav.status == "IN_ORBIT" && wp.type=="ASTEROID_FIELD")
+            {
+                var ndx = findSurveySymbolIndex(wp.symbol);
+                if (ndx>=0)
+                {
+                    buttonList += `<button onclick="extractResource('${state.ship.symbol}','${escape(JSON.stringify(state.surveys.filter(e=>e.symbol==wp.symbol)[0]))}')">Extraction</button>`;
+                }
+                else
+                {
+                    buttonList += `<button onclick="createSurvey('${state.ship.symbol}')">Survey here</button>`;
+                }
+            }
+            if (state.ship.nav.status == "DOCKED")
+            {
+                buttonList += `<button onclick="goOrbit('${state.ship.symbol}')">Go Orbit</button>`;
+            }
+        }else
         {
-            //console.log(state.surveys.filter(e=>e.symbol==wp.symbol))
-            if (state.surveys && state.surveys.filter(e=>e.symbol==wp.symbol).length > 0)
+
+            if (state.ship.nav.status != "DOCKED")
             {
-                buttonList += `<button onclick="extractResource('${state.ship.symbol}','${escape(JSON.stringify(state.surveys.filter(e=>e.symbol==wp.symbol)[0]))}')">Extraction</button>`;
-            }
-            else
-            {
-                buttonList += `<button onclick="createSurvey('${state.ship.symbol}')">Scan here</button>`;
-            }
+                buttonList += `<button onclick="navigateShip('${state.ship.symbol}','${wp.symbol}')">Navigate</button>`;
+            } 
         }
-        if (wp.symbol==state.ship.nav.waypointSymbol && state.ship.nav.status=="DOCKED")
-            buttonList += `<button onclick="goOrbit('${state.ship.symbol}')">Go Orbit</button>`;
-        if (wp.symbol!=state.ship.nav.waypointSymbol && state.ship.nav.status!="DOCKED")
-            buttonList += `<button onclick="navigateShip('${state.ship.symbol}','${wp.symbol}')">Navigate</button>`;    
         return buttonList;
     }
 }
@@ -85,3 +102,11 @@ function calcDist(x,y)
     return Math.round(100*Math.sqrt((here.x - x)*(here.x - x) + (here.y - y)*(here.y - y)))/100;
 }
 
+function listTraits(wp)
+{
+    if (wp.traits && wp.traits.length>0)
+    {
+        return wp.traits.map(t=>t.symbol).join(", ");
+    }
+    return "";
+}

@@ -109,10 +109,13 @@ function navigateShip(shipname,waypoint)
         redrawTabs();
     })
 }
-function scanWaypoint(shipname,waypoint)
+function scanWaypoints(shipname)
 {
     API_POST(`my/ships/${shipname}/scan/waypoints`,null,(response)=>{
-        //state.
+        var ndx = findSystemIndex(state.system.symbol);
+        state.system.waypoints = response.data.waypoints;
+        if (ndx>=0) state.systems[ndx].waypoints = response.data.waypoints;
+        setCooling(shipname,response.data.cooldown.totalSeconds);
         keepState();
         redrawTabs();
     })
@@ -137,7 +140,7 @@ function refreshCargo(shipname,surveydata)
         state.fleet[state.current.shipIndex] = state.ship;
         keepState();
         currentSection = 8;
-        dropIrrelevantCargo(shipname);
+        //dropIrrelevantCargo(shipname);
         redrawTabs();
     })
 }
@@ -172,8 +175,7 @@ function dropCargo(shipname,unit,elementSymbol)
     API_POST(`my/ships/${shipname}/jettison`,{
         symbol:elementSymbol,
         units:unit
-    },(response) => {
-        console.log(response.data);
+    },() => {
         refreshCargo(shipname);
     });
 }
@@ -469,3 +471,43 @@ function doLogin()
     getStatus(success,failure);
 }
 
+function deliverContract(shipSymbol,contractId,tradeSymbol,units)
+{
+    API_POST(`my/contracts/${contractId}/deliver`,{
+        shipSymbol:shipSymbol,tradeSymbol:tradeSymbol,units:units
+    },(response)=>{
+        var ndx = findContractIndex(contractId);
+        if (ndx>=0) state.contracts[ndx] = response.data.contract;
+        var ndxShip = findShipIndex(shipSymbol);
+        if (ndxShip>=0) state.fleet[ndxShip].cargo = response.data.cargo;
+        keepState();
+        redrawTabs();
+    });
+}
+
+function sellCargo(shipSymbol,units,tradeSymbol)
+{
+    API_POST(`my/ships/${shipSymbol}/sell`,{
+        symbol:tradeSymbol,
+        units:units
+    },(response)=>{
+        if(response.data)
+        {
+            state.agent = response.data.agent;
+            state.ship.cargo = response.data.cargo;
+            console.log(response.data.transaction);
+        }
+        keepState();
+        redrawTabs();
+    });
+}
+
+function waypointHas(waypointSymbol,trait)
+{
+    var wp = findWaypoint(waypointSymbol);
+    if (wp.traits && wp.traits.length>0)
+    {
+        return wp.filter(w=>w.trait.symbol==trait).length>0;
+    }
+    return false;
+}

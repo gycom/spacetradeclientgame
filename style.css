@@ -367,3 +367,12 @@ blockquote
 #loginform.newagent + #login {
     display:none;
 }
+
+#loginerror,#unmanagederror
+{
+    font-size:20px;
+}
+#unmanagederror
+{
+    background-color:black;
+}

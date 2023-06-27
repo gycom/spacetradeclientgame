@@ -84,8 +84,11 @@ function shipInfo(ship)
             }
             else
             {
-                if (nav.status=="IN_ORBIT")
-                    buttonList += `<button onclick="createSurvey('${state.ship.symbol}')">Scan here</button>`;
+                console.log(state.ship.nav.route.departure.symbol)
+                console.log(findSurveySymbolIndex(state.ship.nav.route.departure.symbol))
+                console.log(state.ship.nav.route.departure.type);
+                if (nav.status=="IN_ORBIT" && state.ship.nav.route.departure.type=="ASTEROID_FIELD" && findSurveySymbolIndex(state.ship.nav.route.departure.symbol)>=0)
+                    buttonList += `<button onclick="createSurvey('${state.ship.symbol}')">Survey here</button>`;
             }
             return buttonList;
 
@@ -215,9 +218,17 @@ function shipInfo(ship)
                 <td>${d.units}</td>
                 <td title="${d.description}">${d.symbol}</td>
                 <td>${d.name}</td>
-                <td><button onclick="dropCargo('${ship.symbol}',${d.units},'${d.symbol}')">Drop</button></td>
+                <td>${makeButton()}</td>
             </tr>
             `; // for now
+            function makeButton()
+            {//sellCargo(shipSymbol,tradeSymbol,units)
+                var list = "";
+                list += `<button onclick="dropCargo('${ship.symbol}',${d.units},'${d.symbol}')">Drop</button>`;
+                if (ship.nav.status=="DOCKED")
+                    list += `<button onclick="sellCargo('${ship.symbol}',${d.units},'${d.symbol}')">Sell</button>`;
+                return list;
+            }
         }
     }
     }
