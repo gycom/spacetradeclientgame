@@ -66,8 +66,7 @@ function shipInfo(ship)
         <div class="section ${currentSection==8?"active":""}">
             ${shipCargo(ship.cargo)}
         </div>
-`;
-    }
+    `;
     function navSpec(nav)
     {
         return `
@@ -75,7 +74,7 @@ function shipInfo(ship)
         <div>Status: ${nav.status}${actionDockOrbit(nav)}</div>
         <div>Mode: ${nav.flightMode}</div>
         <div>Route: ${routeInfo(nav.route)}</div>
-`;
+    `;
         function makeButtonSurveyExtraction()
         {
             var buttonList = "";
@@ -101,12 +100,19 @@ function shipInfo(ship)
                     Destination: ${wayPoint(route.destination)} 
                     (${dt(route.arrival)})
                 </div>
-`;
+    `;
             }
             else
             return "";
         }
     }
+
+    function refreshNav(nav)
+    {
+        var sect = document.querySelector(".nav");
+        sect.innerHTML = navSpec(nav);
+    }
+
     function actionDockOrbit(nav)
     {
         switch(nav.status)
@@ -139,7 +145,7 @@ function shipInfo(ship)
         <div>Slots: ${frame.moduleSlots}</div>
         <div>Condition:${frame.condition} %</div>
         <div>Required: Power ${frame.requirements.power} Crew: ${frame.requirements.crew}</div>
-`;
+    `;
     }
     function shipReactor(reactor)
     {
@@ -149,7 +155,7 @@ function shipInfo(ship)
         <div>Condition: ${reactor.condition} %</div>
         <div>Power output: ${reactor.powerOutput}</div>
         <div>Required: Crew: ${reactor.requirements.crew}</div>
-`;
+    `;
     }
     function shipEngine(engine)
     {
@@ -161,7 +167,7 @@ function shipInfo(ship)
         Required: Power ${engine.requirements.power} 
         Crew: ${engine.requirements.crew}
         </div>
-`;
+    `;
     }
     function mountList(mnt)
     {
@@ -197,7 +203,7 @@ function shipInfo(ship)
         </div>
         <div>Inventory:${inventoryList(cargo.inventory)}</div>
         <div><button onclick="dropIrrelevantCargo('${ship.symbol}')">Drop Waste</button></div>
-`;
+    `;
     }
     function inventoryList(inv)
     {
@@ -214,6 +220,8 @@ function shipInfo(ship)
             `; // for now
         }
     }
+    }
+
 }
 
 function selectShip()
@@ -256,9 +264,4 @@ function refreshFuel(fuel)
 {
     var sect = document.querySelector(".fuel");
     sect.innerHTML = `<div>Fuel: ${fuel.current} / ${fuel.capacity}</div>`;
-}
-function refreshNav(nav)
-{
-    var sect = document.querySelector(".nav");
-    sect.innerHTML = navSpec(nav);
 }

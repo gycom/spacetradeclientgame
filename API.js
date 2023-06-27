@@ -44,6 +44,7 @@ async function API_GET(query,callback,errorcb)
 
 async function API_POST(query,body,callback,errorcb)
 {
+    let response;
     let json;
     const options = {
         method:"POST",
@@ -57,21 +58,25 @@ async function API_POST(query,body,callback,errorcb)
     if (state && state.token) options.headers.Authorization = `Bearer ${state.token}`;
     try
     {
-        const response = await fetch(`https://api.spacetraders.io/v2/${query}`,options);
-        json = await response.json();
-        console.log("JSON POST",query,json.data)
-    } 
-    catch(err)
-    {
-        dump(err);
-        console.log("JSON ERR",err);
-        if (errorcb) errorcb({error:err}); else unmanaged(json);
+        response = await fetch(`https://api.spacetraders.io/v2/${query}`,options);
+        if (!(response.status>=200 && response.status<=209)) 
+            console.log("code "+response.status+"!!",response);
+    } catch(err) {
+        console.log("ERREUR POST RESPONSE",err,response)
     }
+    console.log("Post Catch")
+    json = await response.json();
+    if (json.error) unmanaged(json.error.message);
+    if (json.error)
+        console.log("JSON ERR",query,json.error.message);
+    else
+        console.log("JSON POST",query,json.data)
     callback(json);
 }
 
-function unmanaged(response)
+function unmanaged(response,ctx)
 {
     var div = document.getElementById("unmanagederror");
-    div.innerHTML = response.error.message;
+    div.innerHTML = response;
+    div.style.color = "yellow";
 }

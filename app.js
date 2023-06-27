@@ -100,8 +100,8 @@ function goDock(shipname)
 function navigateShip(shipname,waypoint)
 {
     API_POST(`my/ships/${shipname}/navigate`,{waypointSymbol:waypoint},(response)=>{
-        if (response.data.fuel) {state.ship.fuel = response.data.fuel; refreshFuel(state.ship.fuel);}
-        if (response.data.nav)  {state.ship.nav = response.data.nav;   refreshNav(state.ship.nav);}
+        if (response.data.fuel) {state.ship.fuel = response.data.fuel;}
+        if (response.data.nav)  {state.ship.nav = response.data.nav;}
         state.fleet[findShipIndex(state.ship.symbol)] = state.ship;
         currentTab = 3;
         currentSection = 0;
@@ -146,7 +146,8 @@ function extractResource(shipname,surveydata)
 {
     lastSurvey = surveydata;
     API_POST(`my/ships/${shipname}/extract`,JSON.parse(unescape(surveydata)),(response)=>{
-        setCooling(shipname,response.data.cooldown.totalSeconds,()=>{extractResource(shipname,surveydata)});
+        if (response.data)
+            setCooling(shipname,response.data.cooldown.totalSeconds,()=>{extractResource(shipname,surveydata)});
         refreshCargo(shipname,surveydata);
     })
 }
@@ -172,7 +173,7 @@ function dropCargo(shipname,unit,elementSymbol)
         symbol:elementSymbol,
         units:unit
     },(response) => {
-        console.log(response);
+        console.log(response.data);
         refreshCargo(shipname);
     });
 }
@@ -181,9 +182,10 @@ function reviveCooldown()
 {
     state.fleet.forEach(ship=> {
         console.log("check cooldown for ",ship.symbol);
-        API_GET(`my/ships/${ship.symbol}/cooldown`,(response)=>{
+        API_GET(`my/ships/${ship.symbol}/cooldown`
+        ,(response)=>{
             setCooling(ship.symbol,response.data.remainingSeconds);
-        },(response)=>{
+        },(response)=>{ // failure
             if (response.error)
                 console.log(response.error.message);
         })
