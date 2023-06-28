@@ -115,6 +115,14 @@ function scanWaypoints(shipname)
         var ndx = findSystemIndex(state.system.symbol);
         state.system.waypoints = response.data.waypoints;
         if (ndx>=0) state.systems[ndx].waypoints = response.data.waypoints;
+        response.data.waypoints.forEach((wp)=>{
+            console.log(wp)
+            if (waypointHas(wp.symbol,"MARKETPLACE"))
+            {
+                console.log("found market",wp)
+                addMarket(state.system.symbol,wp.symbol);
+            }
+        });
         setCooling(shipname,response.data.cooldown.totalSeconds);
         keepState();
         redrawTabs();
@@ -202,15 +210,20 @@ function now()
 function tick()
 {
     Object.keys(cooling).forEach(shipSymbol=>{
-        var delta = Math.floor(((cooling[shipSymbol].end - now()) / (cooling[shipSymbol].max*1000)) * cooling[shipSymbol].max) ;
-        //console.log("tick",delta,shipSymbol,cooling[shipSymbol]);
-        if (delta<0) delta = 0;
+        var percent = Math.floor(((cooling[shipSymbol].end - now()) / (cooling[shipSymbol].max*1000)) * cooling[shipSymbol].max);
+        if (percent < 0) percent = 0;
         var engineTemp = document.getElementById(`engineTemp${shipSymbol}`);
-        engineTemp.innerHTML = `<div style="90vw;background-color:white;height:20px;">
-        <div style="height:100%;background-color:red;width:${delta}%">${delta}</div>
-        </div>`;
-
+        engineTemp.innerHTML = progressBar(percent);
+    });
+        
+    if (state.markets && state.markets.length>0)
+    {
+        state.markets.filter(m=>m.imports.length+m.exports.length+m.exchange.length==0).forEach((m,n)=>{
+            if (n>1) return;
+            console.log("reading",m,n)
+            window.setTimeout(()=>readMarket(m.systemSymbol,m.symbol),n*1000);
         })
+    }
 }
 var cooling = {};
 
@@ -228,18 +241,22 @@ function setCooling(shipSymbol,cooldown,restart)
         engineTemp.id =`engineTemp${shipSymbol}`;
         document.getElementById("engineTemp").appendChild(engineTemp);
     }
-    engineTemp.innerHTML = `<div style="90vw;background-color:white;height:20px;">
-    <div style="height:100%;background-color:red;width:100%">${cooldown}</div>
-    </div>`;
+    engineTemp.innerHTML = progressBar(100); // start at 100%
 
     function showCoolDown(shipSymbol)
     {
         var engineTemp = document.getElementById(`engineTemp${shipSymbol}`);
         engineTemp.innerHTML = "";
-        //window.clearTimeOut(cooling[shipSymbol].timer);
         delete cooling[shipSymbol];
         if (restart) window.setTimeout(restart,1000);
     }
+}
+function progressBar(delta)
+{
+    return `
+    <div style="90vw;background-color:white;height:20px;">
+        <div style="height:100%;background-color:red;width:${delta}%">${delta}</div>
+    </div>`;
 }
 
 function cancelRestart(shipSymbol)
@@ -389,7 +406,8 @@ function stateFromRegister(response)
             factionIndex:   0,
             shipIndex:      0,
             systemIndex:    0,
-            surveyIndex:    0
+            surveyIndex:    0,
+            marketIndex:    0
         }
     };
     return state;
@@ -505,9 +523,62 @@ function sellCargo(shipSymbol,units,tradeSymbol)
 function waypointHas(waypointSymbol,trait)
 {
     var wp = findWaypoint(waypointSymbol);
-    if (wp.traits && wp.traits.length>0)
+    console.log(wp);
+    if (wp && wp.traits && wp.traits.length>0)
     {
-        return wp.filter(w=>w.trait.symbol==trait).length>0;
+        return wp.traits.filter(w=>w.symbol==trait).length>0;
     }
     return false;
+}
+
+function doesMarketBuy(waypointSymbol,tradeSymbol)
+{
+    return true;
+}
+
+function findWaypoint(waypointSymbol)
+{
+    var found;
+    state.system.waypoints.forEach(wp=>{
+        if (wp.symbol == waypointSymbol)
+            found = wp;
+    });
+    return found;
+}
+
+function readMarket(systemSymbol,waypointSymbol)
+{
+    API_GET(`systems/${systemSymbol}/waypoints/${waypointSymbol}/market`,(response)=>{
+        var ndx = findMarketIndex(waypointSymbol);
+        
+        if (ndx>=0) 
+        {
+            state.markets[ndx]=response.data;
+            keepState();
+            redrawTabs();
+        }
+    })
+}
+
+function addMarket(systemSymbol,waypointSymbol)
+{
+    if (!state.markets) state.markets = [];
+    var ndx = findMarketIndex(waypointSymbol);
+    if (ndx==-1)
+    {
+        state.markets.push({
+            symbol:waypointSymbol,
+            systemSymbol:systemSymbol,
+            exports:[],
+            imports:[],
+            exchange:[]
+        });
+        keepState();
+        redrawTabs();
+    }
+}
+
+function findMarketIndex(sel)
+{
+    return ((state.markets.map((e,n)=>({n:n,e:e})).filter(e=>e.e.symbol==sel))[0]||{n:-1}).n;
 }

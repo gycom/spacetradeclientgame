@@ -6,7 +6,8 @@ var tabList = [
     ["Factions","faction"],
     ["Fleet","ship"],
     ["System","galaxy"],
-    ["Surveys","atom"]
+    ["Surveys","atom"],
+    ["Markets","market"]
 ];
 function showTab()
 {
@@ -62,6 +63,9 @@ function showTabContent(data)
         </div>
         <div class="content text-white icon icon-atom ${currentTab==5?'active':''}" onclick="selectSurvey()">
             ${panListDetail("Surveys",surveyList(data.surveys),surveyInfo(data.survey),"refreshSurvey")}
+        </div>
+        <div class="content text-white icon icon-market ${currentTab==6?'active':''}" onclick="selectMarket()">
+            ${panListDetail("Markets",marketList(data.markets),marketInfo(data.market),"refreshMarket")}
         </div>
         `;
     initSect();

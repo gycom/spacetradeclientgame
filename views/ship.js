@@ -66,171 +66,168 @@ function shipInfo(ship)
         <div class="section ${currentSection==8?"active":""}">
             ${shipCargo(ship.cargo)}
         </div>
-    `;
-    function navSpec(nav)
-    {
-        return `
-        <div>System: ${nav.systemSymbol} Location: ${nav.waypointSymbol} ${makeButtonSurveyExtraction()}</div>
-        <div>Status: ${nav.status}${actionDockOrbit(nav)}</div>
-        <div>Mode: ${nav.flightMode}</div>
-        <div>Route: ${routeInfo(nav.route)}</div>
-    `;
-        function makeButtonSurveyExtraction()
+        `;
+        function navSpec(nav)
         {
-            var buttonList = "";
-            if (state.surveys && state.surveys.filter(e=>e.symbol == nav.waypointSymbol).length > 0)
+            return `
+            <div>System: ${nav.systemSymbol} Location: ${nav.waypointSymbol} ${makeButtonSurveyExtraction()}</div>
+            <div>Status: ${nav.status}${actionDockOrbit(nav)}</div>
+            <div>Mode: ${nav.flightMode}</div>
+            <div>${routeInfo(nav.route)}</div>
+        `;
+            function makeButtonSurveyExtraction()
             {
-                buttonList += `<button onclick="extractResource('${state.ship.symbol}','${escape(JSON.stringify(state.surveys.filter(e=>e.symbol == nav.waypointSymbol)[0]))}')">Extraction</button>`;
-            }
-            else
-            {
-                console.log(state.ship.nav.route.departure.symbol)
-                console.log(findSurveySymbolIndex(state.ship.nav.route.departure.symbol))
-                console.log(state.ship.nav.route.departure.type);
-                if (nav.status=="IN_ORBIT" && state.ship.nav.route.departure.type=="ASTEROID_FIELD" && findSurveySymbolIndex(state.ship.nav.route.departure.symbol)>=0)
-                    buttonList += `<button onclick="createSurvey('${state.ship.symbol}')">Survey here</button>`;
-            }
-            return buttonList;
+                var buttonList = "";
+                if (state.surveys && state.surveys.filter(e=>e.symbol == nav.waypointSymbol).length > 0)
+                {
+                    buttonList += `<button onclick="extractResource('${state.ship.symbol}','${escape(JSON.stringify(state.surveys.filter(e=>e.symbol == nav.waypointSymbol)[0]))}')">Extraction</button>`;
+                }
+                else
+                {
+                    if (nav.status=="IN_ORBIT" && state.ship.nav.route.departure.type=="ASTEROID_FIELD" && findSurveySymbolIndex(state.ship.nav.route.departure.symbol)>=0)
+                        buttonList += `<button onclick="createSurvey('${state.ship.symbol}')">Survey here</button>`;
+                }
+                return buttonList;
 
+            }
+            function routeInfo(route)
+            {
+                if (route && ship.nav.status=="IN_TRANSIT")
+                {
+                    return `
+                    <div>
+                        Departure: ${wayPoint(route.departure)} (${dt(route.departureTime)})<br>
+                        Destination: ${wayPoint(route.destination)} 
+                        (${dt(route.arrival)})
+                    </div>
+                    `;
+                }
+                else
+                return "";
+            }
         }
-        function routeInfo(route)
+
+        function refreshNav(nav)
         {
-            if (route)
+            var sect = document.querySelector(".nav");
+            sect.innerHTML = navSpec(nav);
+        }
+
+        function actionDockOrbit(nav)
+        {
+            switch(nav.status)
+            {
+                case "DOCKED":
+                    return `<button onclick="goOrbit('${ship.registration.name}')">Go Orbit</button>`;
+                case "IN_ORBIT":
+                    return `<button onclick="goDock('${ship.registration.name}')">Dock</button>`;
+                case "IN_TRANSIT":
+                    return "";
+            }
+        }
+        function wayPoint(w)
+        {
+            return `${w.type} ${w.symbol} (${w.x})-(${w.y})`;
+        }
+        function moduleList(mod)
+        {
+            return mod.map(moduleItem).join("<br>");
+            function moduleItem(e)
+            {
+                return `${e.name}: Require: Crew: ${e.requirements.crew} Power: ${e.requirements.power} Slots: ${e.requirements.slots}`;
+            }
+        }
+        function shipFrame(frame)
+        {
+            return `
+            <div>${frame.name}</div>
+            <div>${frame.description}</div>
+            <div>Slots: ${frame.moduleSlots}</div>
+            <div>Condition:${frame.condition} %</div>
+            <div>Required: Power ${frame.requirements.power} Crew: ${frame.requirements.crew}</div>
+        `;
+        }
+        function shipReactor(reactor)
+        {
+            return `
+            <div>${reactor.name}</div>
+            <div>${reactor.description}</div>
+            <div>Condition: ${reactor.condition} %</div>
+            <div>Power output: ${reactor.powerOutput}</div>
+            <div>Required: Crew: ${reactor.requirements.crew}</div>
+        `;
+        }
+        function shipEngine(engine)
+        {
+            return `
+            <div>${engine.name}</div>
+            <div>${engine.description}</div>
+            <div>Condition:${engine.condition} %</div>
+            <div>
+            Required: Power ${engine.requirements.power} 
+            Crew: ${engine.requirements.crew}
+            </div>
+        `;
+        }
+        function mountList(mnt)
+        {
+            return "<div>" + mnt.map(mountItem).join("</div><hr><div>") + "</div>";
+            function mountItem(e)
             {
                 return `
-                <div>
-                    Departure: ${wayPoint(route.departure)} (${dt(route.departureTime)})<br>
-                    Destination: ${wayPoint(route.destination)} 
-                    (${dt(route.arrival)})
-                </div>
-    `;
-            }
-            else
-            return "";
-        }
-    }
-
-    function refreshNav(nav)
-    {
-        var sect = document.querySelector(".nav");
-        sect.innerHTML = navSpec(nav);
-    }
-
-    function actionDockOrbit(nav)
-    {
-        switch(nav.status)
-        {
-            case "DOCKED":
-                return `<button onclick="goOrbit('${ship.registration.name}')">Go Orbit</button>`;
-            case "IN_ORBIT":
-                return `<button onclick="goDock('${ship.registration.name}')">Dock</button>`;
-            case "IN_TRANSIT":
-                return "";
-        }
-    }
-    function wayPoint(w)
-    {
-        return `${w.type} ${w.symbol} (${w.x})-(${w.y})`;
-    }
-    function moduleList(mod)
-    {
-        return mod.map(moduleItem).join("<br>");
-        function moduleItem(e)
-        {
-            return `${e.name}: Require: Crew: ${e.requirements.crew} Power: ${e.requirements.power} Slots: ${e.requirements.slots}`;
-        }
-    }
-    function shipFrame(frame)
-    {
-        return `
-        <div>${frame.name}</div>
-        <div>${frame.description}</div>
-        <div>Slots: ${frame.moduleSlots}</div>
-        <div>Condition:${frame.condition} %</div>
-        <div>Required: Power ${frame.requirements.power} Crew: ${frame.requirements.crew}</div>
-    `;
-    }
-    function shipReactor(reactor)
-    {
-        return `
-        <div>${reactor.name}</div>
-        <div>${reactor.description}</div>
-        <div>Condition: ${reactor.condition} %</div>
-        <div>Power output: ${reactor.powerOutput}</div>
-        <div>Required: Crew: ${reactor.requirements.crew}</div>
-    `;
-    }
-    function shipEngine(engine)
-    {
-        return `
-        <div>${engine.name}</div>
-        <div>${engine.description}</div>
-        <div>Condition:${engine.condition} %</div>
-        <div>
-        Required: Power ${engine.requirements.power} 
-        Crew: ${engine.requirements.crew}
-        </div>
-    `;
-    }
-    function mountList(mnt)
-    {
-        return "<div>" + mnt.map(mountItem).join("</div><hr><div>") + "</div>";
-        function mountItem(e)
-        {
-            return `
-            <p>${e.name}:<br> 
-                Require: Crew ${e.requirements.crew} Power: ${e.requirements.power}<br>
-                Strength: ${e.strength}<br>
-                ${e.description}<br>
-            </p>
-            ${e.deposits?depositList(e.deposits):""}
-            `;
-        }
-    }
-    function depositList(m)
-    {
-        return m.map(depositItem).join("");
-        function depositItem(item)
-        {
-            return `<div>${item}</div>`;
-        }
-    }
-    function shipCargo(cargo)
-    {
-        return `
-        <div>Capacity:${cargo.capacity}</div>
-        <div>Units:${cargo.units}</div>
-        <div>` 
-            + (lastSurvey?`<button onclick="extractResource('${ship.symbol}',lastSurvey)">Extract again</button>`:"")
-            + `<button onclick="cancelRestart('${ship.symbol}')">Stop after cooling</button>
-        </div>
-        <div>Inventory:${inventoryList(cargo.inventory)}</div>
-        <div><button onclick="dropIrrelevantCargo('${ship.symbol}')">Drop Waste</button></div>
-    `;
-    }
-    function inventoryList(inv)
-    {
-        return "<table style='width:100%'>" + inv.map(invDetail).join("") + "</table>";
-        function invDetail(d)
-        {
-            return `
-            <tr>
-                <td>${d.units}</td>
-                <td title="${d.description}">${d.symbol}</td>
-                <td>${d.name}</td>
-                <td>${makeButton()}</td>
-            </tr>
-            `; // for now
-            function makeButton()
-            {//sellCargo(shipSymbol,tradeSymbol,units)
-                var list = "";
-                list += `<button onclick="dropCargo('${ship.symbol}',${d.units},'${d.symbol}')">Drop</button>`;
-                if (ship.nav.status=="DOCKED")
-                    list += `<button onclick="sellCargo('${ship.symbol}',${d.units},'${d.symbol}')">Sell</button>`;
-                return list;
+                <p>${e.name}:<br> 
+                    Require: Crew ${e.requirements.crew} Power: ${e.requirements.power}<br>
+                    Strength: ${e.strength}<br>
+                    ${e.description}<br>
+                </p>
+                ${e.deposits?depositList(e.deposits):""}
+                `;
             }
         }
-    }
+        function depositList(m)
+        {
+            return m.map(depositItem).join("");
+            function depositItem(item)
+            {
+                return `<div>${item}</div>`;
+            }
+        }
+        function shipCargo(cargo)
+        {
+            return `
+            <div>Capacity:${cargo.capacity}</div>
+            <div>Units:${cargo.units}</div>
+            <div>` 
+                + (lastSurvey?`<button onclick="extractResource('${ship.symbol}',lastSurvey)">Extract again</button>`:"")
+                + `<button onclick="cancelRestart('${ship.symbol}')">Stop after cooling</button>
+            </div>
+            <div>Inventory:${inventoryList(cargo.inventory)}</div>
+            <div><button onclick="dropIrrelevantCargo('${ship.symbol}')">Drop Waste</button></div>
+        `;
+        }
+        function inventoryList(inv)
+        {
+            return "<table style='width:100%'>" + inv.map(invDetail).join("") + "</table>";
+            function invDetail(d)
+            {
+                return `
+                <tr>
+                    <td>${d.units}</td>
+                    <td title="${d.description}">${d.symbol}</td>
+                    <td>${d.name}</td>
+                    <td>${makeButton()}</td>
+                </tr>
+                `; // for now
+                function makeButton()
+                {//sellCargo(shipSymbol,tradeSymbol,units)
+                    var list = "";
+                    list += `<button onclick="dropCargo('${ship.symbol}',${d.units},'${d.symbol}')">Drop</button>`;
+                    if (ship.nav.status=="DOCKED")
+                        list += `<button onclick="sellCargo('${ship.symbol}',${d.units},'${d.symbol}')">Sell</button>`;
+                    return list;
+                }
+            }
+        }
     }
 
 }
