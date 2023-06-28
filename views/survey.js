@@ -39,11 +39,13 @@ function selectSurvey()
 }
 function findSurveySignatureIndex(sel)
 {
-    return (state.surveys.map((e,n)=>({n:n,e:e})).filter(e=>e.e.signature==sel)[0]||[{n:-1}]).n;
+    if (!state.surveys) return -1;
+    return (state.surveys.map((e,n)=>({n:n,e:e})).filter(e=>e.e.signature==sel)[0]||{n:-1}).n;
 }
 function findSurveySymbolIndex(sel)
 {
-    return (state.surveys.map((e,n)=>({n:n,e:e})).filter(e=>e.e.symbol==sel)[0]||[{n:-1}]).n;
+    if (!state.surveys) return -1;
+    return (state.surveys.map((e,n)=>({n:n,e:e})).filter(e=>e.e.symbol==sel)[0]||{n:-1}).n;
 }
 
 function refreshSurvey()

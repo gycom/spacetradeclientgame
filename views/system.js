@@ -81,7 +81,7 @@ function selectSystem()
 }
 function findSystemIndex(sel)
 {
-    return ((state.systems.map((e,n)=>({n:n,e:e})).filter(e=>e.e.symbol==sel))[0]||[{n:-1}]).n;
+    return ((state.systems.map((e,n)=>({n:n,e:e})).filter(e=>e.e.symbol==sel))[0]||{n:-1}).n;
 }
 
 function refreshSystemList()

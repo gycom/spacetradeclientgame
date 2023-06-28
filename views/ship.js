@@ -250,7 +250,7 @@ function selectShip()
 }
 function findShipIndex(sel)
 {
-    return (state.fleet.map((e,n)=>({n:n,e:e})).filter(e=>e.e.symbol==sel)||[{n:-1}])[0].n;
+    return (state.fleet.map((e,n)=>({n:n,e:e})).filter(e=>e.e.symbol==sel)||{n:-1})[0].n;
 }
 function refreshFleetList(callback)
 {

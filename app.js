@@ -348,7 +348,7 @@ function dump(objectvalue) // for debugging
 
 function register()
 {
-    delete state.token;
+    if (state && state.token) delete state.token;
     const body = {
         faction:document.getElementById("faction").value,
         symbol: document.getElementById("symbol").value,
